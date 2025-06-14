@@ -17,8 +17,14 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 5000;
 
-// Middleware для Express (если понадобится для статики или API, но для этой игры не обязательно)
+// Middleware для Express
 app.use(express.json());
+
+// Простой роут для проверки работоспособности сервера
+app.get('/', (req, res) => {
+  res.send('Backend server is running!');
+});
+
 
 // Socket.IO логика
 io.on('connection', (socket) => {
@@ -72,7 +78,7 @@ io.on('connection', (socket) => {
             socket.join(game.code);
             emitGameUpdate(game.code);
             console.log(`${playerName} (${socket.id}) присоединился к игре ${game.code}`);
-        } catch (error) {
+        } catch (error) => {
             socket.emit('gameError', error.message);
         }
     });
@@ -87,7 +93,7 @@ io.on('connection', (socket) => {
         try {
             const game = gameManager.submitCharacter(gameCode, socket.id, characterName);
             emitGameUpdate(game.code);
-        } catch (error) {
+        } catch (error) => {
             socket.emit('gameError', error.message);
         }
     });
@@ -103,7 +109,7 @@ io.on('connection', (socket) => {
             } else {
                 socket.emit('gameError', 'Только хост может начать игру.');
             }
-        } catch (error) {
+        } catch (error) => {
             socket.emit('gameError', error.message);
         }
     });
@@ -133,7 +139,7 @@ io.on('connection', (socket) => {
         try {
             gameManager.makeGuess(gameCode, socket.id, guess);
             emitGameUpdate(gameCode);
-        } catch (error) {
+        } catch (error) => {
             socket.emit('gameError', error.message);
         }
     });
@@ -150,7 +156,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- НОВЫЙ ОБРАБОТЧИК ---
     // Игрок добровольно покидает игру
     socket.on('leaveGame', (gameCode) => {
         try {
