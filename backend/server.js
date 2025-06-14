@@ -4,43 +4,50 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const gameManager = require('./gameManager'); // Наш менеджер игр
+const gameManager = require('./gameManager');
+
+// --- ШАГ 1: Импортируем cors ---
+const cors = require('cors');
 
 const app = express();
+
+// --- ШАГ 2: Настраиваем CORS для Express ---
+// Это более надежный способ, чем передавать его в Socket.IO
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  methods: ["GET", "POST"]
+};
+app.use(cors(corsOptions));
+
+
 const server = http.createServer(app);
+
+// --- ШАГ 3: Упрощаем инициализацию Socket.IO ---
+// Теперь Socket.IO будет наследовать CORS-политику от Express
 const io = new Server(server, {
-    cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000", // Разрешаем запросы с фронтенда
-        methods: ["GET", "POST"]
-    }
+    cors: corsOptions // Мы все еще передаем опции сюда для совместимости
 });
 
 const PORT = process.env.PORT || 5000;
 
-// Middleware для Express
 app.use(express.json());
 
-// Простой роут для проверки работоспособности сервера
 app.get('/', (req, res) => {
   res.send('Backend server is running!');
 });
 
-
-// Socket.IO логика
+// Socket.IO логика остается без изменений
 io.on('connection', (socket) => {
     console.log(`Пользователь подключился: ${socket.id}`);
 
-    // Отправляет обновленное состояние игры всем в комнате
     const emitGameUpdate = (gameCode) => {
         const game = gameManager.getGame(gameCode);
         if (game) {
-            // Отправляем каждому игроку его персонажа на лбу при старте
             if (game.status === 'in-progress') {
                 game.players.forEach(p => {
                     io.to(p.id).emit('characterAssigned', p.characterOnForehead);
                 });
             }
-            // Отправляем общее состояние игры (без персонажей на лбу)
             const publicGameData = {
                 ...game,
                 players: game.players.map(p => ({
@@ -48,17 +55,15 @@ io.on('connection', (socket) => {
                     name: p.name,
                     isHost: p.isHost,
                     guessed: p.guessed,
-                    characterSubmitted: !!p.characterSubmitted, // Отправляем только факт, а не самого персонажа
+                    characterSubmitted: !!p.characterSubmitted,
                 }))
             };
             io.to(gameCode).emit('gameUpdate', publicGameData);
         } else {
-            // Если игра удалена, сообщаем клиентам
             io.to(gameCode).emit('gameEnded', 'Игра завершена или удалена.');
         }
     };
 
-    // Создание игры
     socket.on('createGame', (playerName) => {
         try {
             const game = gameManager.createGame(socket.id, playerName);
@@ -71,24 +76,21 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Присоединение к игре
     socket.on('joinGame', (gameCode, playerName) => {
         try {
             const game = gameManager.joinGame(gameCode, socket.id, playerName);
             socket.join(game.code);
             emitGameUpdate(game.code);
             console.log(`${playerName} (${socket.id}) присоединился к игре ${game.code}`);
-        } catch (error) => {
+        } catch (error) {
             socket.emit('gameError', error.message);
         }
     });
 
-    // Получение списка публичных игр
     socket.on('getPublicGames', () => {
         socket.emit('publicGamesList', gameManager.getPublicGames());
     });
 
-    // Игрок загадывает персонажа
     socket.on('submitCharacter', (gameCode, characterName) => {
         try {
             const game = gameManager.submitCharacter(gameCode, socket.id, characterName);
@@ -98,7 +100,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Хост начинает игру
     socket.on('startGame', (gameCode) => {
         try {
             const game = gameManager.getGame(gameCode);
@@ -109,12 +110,11 @@ io.on('connection', (socket) => {
             } else {
                 socket.emit('gameError', 'Только хост может начать игру.');
             }
-        } catch (error) => {
+        } catch (error) {
             socket.emit('gameError', error.message);
         }
     });
 
-    // Игрок задает вопрос
     socket.on('askQuestion', (gameCode, question) => {
         try {
             gameManager.askQuestion(gameCode, socket.id, question);
@@ -124,7 +124,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Игрок отвечает на вопрос
     socket.on('answerQuestion', (gameCode, answer) => {
         try {
             gameManager.answerQuestion(gameCode, socket.id, answer);
@@ -134,17 +133,15 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Игрок делает попытку угадать
     socket.on('makeGuess', (gameCode, guess) => {
         try {
             gameManager.makeGuess(gameCode, socket.id, guess);
             emitGameUpdate(gameCode);
-        } catch (error) => {
+        } catch (error) {
             socket.emit('gameError', error.message);
         }
     });
 
-    // Чат
     socket.on('chatMessage', (gameCode, message) => {
         const game = gameManager.getGame(gameCode);
         if (game) {
@@ -156,7 +153,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Игрок добровольно покидает игру
     socket.on('leaveGame', (gameCode) => {
         try {
             socket.leave(gameCode);
@@ -169,8 +165,6 @@ io.on('connection', (socket) => {
         }
     });
 
-
-    // Отключение пользователя (при закрытии вкладки)
     socket.on('disconnect', () => {
         console.log(`Пользователь отключился: ${socket.id}`);
         const game = gameManager.leaveGame(socket.id);
