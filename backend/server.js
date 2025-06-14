@@ -5,30 +5,24 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const gameManager = require('./gameManager');
-
-// --- ШАГ 1: Импортируем cors ---
 const cors = require('cors');
 
 const app = express();
 
-// --- ШАГ 2: Настраиваем CORS для Express ---
-// Это более надежный способ, чем передавать его в Socket.IO
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:3000",
   methods: ["GET", "POST"]
 };
 app.use(cors(corsOptions));
 
-
 const server = http.createServer(app);
 
-// --- ШАГ 3: Упрощаем инициализацию Socket.IO ---
-// Теперь Socket.IO будет наследовать CORS-политику от Express
 const io = new Server(server, {
-    cors: corsOptions // Мы все еще передаем опции сюда для совместимости
+    cors: corsOptions
 });
 
-const PORT = process.env.PORT || 5000;
+// Мы больше не используем PORT, так как Vercel управляет этим сам
+// const PORT = process.env.PORT || 5000; 
 
 app.use(express.json());
 
@@ -36,7 +30,7 @@ app.get('/', (req, res) => {
   res.send('Backend server is running!');
 });
 
-// Socket.IO логика остается без изменений
+// Вся логика Socket.IO остается без изменений
 io.on('connection', (socket) => {
     console.log(`Пользователь подключился: ${socket.id}`);
 
@@ -70,7 +64,6 @@ io.on('connection', (socket) => {
             socket.join(game.code);
             socket.emit('gameCreated', game.code);
             emitGameUpdate(game.code);
-            console.log(`Игра ${game.code} создана хостом ${playerName} (${socket.id})`);
         } catch (error) {
             socket.emit('gameError', error.message);
         }
@@ -81,7 +74,6 @@ io.on('connection', (socket) => {
             const game = gameManager.joinGame(gameCode, socket.id, playerName);
             socket.join(game.code);
             emitGameUpdate(game.code);
-            console.log(`${playerName} (${socket.id}) присоединился к игре ${game.code}`);
         } catch (error) {
             socket.emit('gameError', error.message);
         }
@@ -95,7 +87,7 @@ io.on('connection', (socket) => {
         try {
             const game = gameManager.submitCharacter(gameCode, socket.id, characterName);
             emitGameUpdate(game.code);
-        } catch (error) => {
+        } catch (error) {
             socket.emit('gameError', error.message);
         }
     });
@@ -106,7 +98,6 @@ io.on('connection', (socket) => {
             if (game && game.hostId === socket.id) {
                 gameManager.startGame(gameCode);
                 emitGameUpdate(game.code);
-                console.log(`Игра ${game.code} началась.`);
             } else {
                 socket.emit('gameError', 'Только хост может начать игру.');
             }
@@ -128,7 +119,7 @@ io.on('connection', (socket) => {
         try {
             gameManager.answerQuestion(gameCode, socket.id, answer);
             emitGameUpdate(gameCode);
-        } catch (error) {
+        } catch (error) => {
             socket.emit('gameError', error.message);
         }
     });
@@ -174,6 +165,7 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
-});
+// --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ---
+// Мы больше не запускаем сервер сами с помощью server.listen().
+// Вместо этого мы экспортируем его, чтобы Vercel мог запустить его для нас.
+module.exports = server;
