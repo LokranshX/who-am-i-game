@@ -1,0 +1,45 @@
+name: Deploy Frontend to GitHub Pages
+
+# Запускать этот воркфлоу при каждом пуше в ветку main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    # Использовать последнюю версию Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # Шаг 1: Скачиваем код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Шаг 2: Устанавливаем Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Используем стабильную версию Node.js
+
+      # Шаг 3: Устанавливаем зависимости фронтенда
+      - name: Install Frontend Dependencies
+        run: npm install
+        working-directory: ./frontend # Указываем, что команду нужно выполнять в папке frontend
+
+      # Шаг 4: Собираем проект
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./frontend
+        env:
+          # Передаем наш секрет в процесс сборки
+          REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
+
+      # Шаг 5: Деплоим собранный проект в ветку gh-pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # Токен для аутентификации, предоставляется GitHub автоматически
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Папка, которую нужно опубликовать
+          publish_dir: ./frontend/build
