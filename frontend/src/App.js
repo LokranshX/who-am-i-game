@@ -6,7 +6,7 @@ import Home from './components/Home';
 import Lobby from './components/Lobby';
 import GameRoom from './components/GameRoom';
 
-// --- ШАГ 1: Импортируем все изображения как модули ---
+// --- Массив изображений (остается без изменений) ---
 import bg1 from './images/bg1.jpg';
 import bg2 from './images/bg2.jpg';
 import bg3 from './images/bg3.jpg';
@@ -18,8 +18,6 @@ import bg8 from './images/bg8.jpg';
 import bg9 from './images/bg9.jpg';
 import bg10 from './images/bg10.jpg';
 
-
-// --- ШАГ 2: Создаем массив из импортированных изображений ---
 const backgroundImages = [
   bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9, bg10
 ];
@@ -33,11 +31,9 @@ function App() {
 
   const navigate = useNavigate();
 
-  // --- ШАГ 3: Используем массив в логике смены фона ---
+  // Логика смены фона (остается без изменений)
   useEffect(() => {
     let currentIndex = 0;
-    // Устанавливаем начальный фон
-    // Теперь мы используем переменную напрямую, без process.env.PUBLIC_URL
     document.body.style.backgroundImage = `url(${backgroundImages[currentIndex]})`;
 
     const intervalId = setInterval(() => {
@@ -54,7 +50,7 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Логика сокетов остается без изменений
+  // Логика сокетов (остается без изменений)
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Подключено к серверу Socket.IO');
@@ -167,7 +163,8 @@ function App() {
 
 export default function AppWrapper() {
   return (
-    <Router>
+    // --- ИЗМЕНЕНИЕ ПРЯМО ЗДЕСЬ ---
+    <Router basename="/who-am-i-game">
       <App />
     </Router>
   );
