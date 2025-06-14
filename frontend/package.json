@@ -1,6 +1,7 @@
 {
   "name": "who-am-i-frontend",
   "version": "0.1.0",
+  "homepage": "https://lokranshx.github.io/who-am-i-game",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
