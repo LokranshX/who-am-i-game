@@ -4,14 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import PlayerCard from './PlayerCard';
 import Chat from './Chat';
 
-function GameRoom({ game, playerName, socketId, characterOnForehead, onAskQuestion, onAnswerQuestion, onMakeGuess, onChatMessage, onLeaveGame }) {
+function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion, onMakeGuess, onChatMessage, onLeaveGame }) {
   const [questionInput, setQuestionInput] = useState('');
   const [guessInput, setGuessInput] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!game || game.status === 'waiting') {
-      navigate(`/lobby/${game?.code || ''}`);
+    if (!game || game.status === 'waiting' || game.status === 'finished') {
+      // Если игра закончилась, остаемся в комнате, чтобы видеть результаты
+      if (game && game.status === 'waiting') {
+        navigate(`/lobby/${game.code}`);
+      }
     }
   }, [game, navigate]);
 
@@ -25,7 +28,9 @@ function GameRoom({ game, playerName, socketId, characterOnForehead, onAskQuesti
   const hasGuessed = myPlayer?.guessed;
 
   const lastMessage = game.chatMessages.length > 0 ? game.chatMessages[game.chatMessages.length - 1] : null;
-  const isQuestionPending = lastMessage && lastMessage.sender === currentPlayer?.name;
+  // Проверяем, что последний ответивший - не тот, кто задал вопрос
+  const isQuestionPending = lastMessage && lastMessage.sender === currentPlayer?.name && game.players.some(p => p.id !== currentPlayer.id);
+
 
   const handleAskQuestion = () => {
     if (questionInput.trim() && isMyTurn && !hasGuessed) {
@@ -65,16 +70,19 @@ function GameRoom({ game, playerName, socketId, characterOnForehead, onAskQuesti
     }
 
     if (isQuestionPending) {
-      return (
-        <div>
-          <h3>Ответьте на вопрос от {currentPlayer.name}:</h3>
-          <p>"{lastMessage.message}"</p>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            <button onClick={() => onAnswerQuestion(true)} className="btn success">Да</button>
-            <button onClick={() => onAnswerQuestion(false)} className="btn danger">Нет</button>
-          </div>
-        </div>
-      );
+        const characterOwner = game.players.find(p => p.characterSubmitted.toLowerCase() === currentPlayer.characterOnForehead.toLowerCase());
+        if (characterOwner && characterOwner.id === socketId) {
+            return (
+                <div>
+                  <h3>Ответьте на вопрос от {currentPlayer.name}:</h3>
+                  <p>"{lastMessage.message}"</p>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <button onClick={() => onAnswerQuestion(true)} className="btn success">Да</button>
+                    <button onClick={() => onAnswerQuestion(false)} className="btn danger">Нет</button>
+                  </div>
+                </div>
+            );
+        }
     }
 
     return <h3>Ожидайте своего хода...</h3>;
@@ -96,9 +104,10 @@ function GameRoom({ game, playerName, socketId, characterOnForehead, onAskQuesti
               <PlayerCard
                 key={player.id}
                 player={player}
-                isCurrentPlayer={player.id === socketId}
+                // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+                // Передаем флаг, является ли эта карточка карточкой текущего пользователя
+                isSelf={player.id === socketId}
                 isTurn={player.id === currentPlayer?.id}
-                characterOnForehead={player.id === socketId ? characterOnForehead : null}
               />
             ))}
           </div>

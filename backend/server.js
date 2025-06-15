@@ -33,11 +33,9 @@ io.on('connection', (socket) => {
     const emitGameUpdate = (gameCode) => {
         const game = gameManager.getGame(gameCode);
         if (game) {
-            if (game.status === 'in-progress') {
-                game.players.forEach(p => {
-                    io.to(p.id).emit('characterAssigned', p.characterOnForehead);
-                });
-            }
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Теперь мы отправляем всем игрокам полный список игроков с их персонажами на лбу.
+            // Секретные данные, такие как characterSubmitted, по-прежнему скрыты.
             const publicGameData = {
                 ...game,
                 players: game.players.map(p => ({
@@ -45,7 +43,9 @@ io.on('connection', (socket) => {
                     name: p.name,
                     isHost: p.isHost,
                     guessed: p.guessed,
-                    characterSubmitted: !!p.characterSubmitted,
+                    characterSubmitted: !!p.characterSubmitted, // Отправляем только факт загадывания
+                    characterOnForehead: p.characterOnForehead, // А вот персонажа на лбу отправляем
+                    questionsAskedInTurn: p.questionsAskedInTurn
                 }))
             };
             io.to(gameCode).emit('gameUpdate', publicGameData);
@@ -53,6 +53,8 @@ io.on('connection', (socket) => {
             io.to(gameCode).emit('gameEnded', 'Игра завершена или удалена.');
         }
     };
+
+    // ... остальная часть файла без изменений ...
 
     socket.on('createGame', (playerName) => {
         try {
@@ -115,7 +117,7 @@ io.on('connection', (socket) => {
         try {
             gameManager.answerQuestion(gameCode, socket.id, answer);
             emitGameUpdate(gameCode);
-        } catch (error) { // <--- ИСПРАВЛЕНИЕ ЗДЕСЬ
+        } catch (error) {
             socket.emit('gameError', error.message);
         }
     });
