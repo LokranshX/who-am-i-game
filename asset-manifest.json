@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/who-am-i-game/static/css/main.c22fef27.css",
-    "main.js": "/who-am-i-game/static/js/main.2827bf49.js",
+    "main.js": "/who-am-i-game/static/js/main.92bd659a.js",
     "static/media/logo.png": "/who-am-i-game/static/media/logo.2b7aa9d7d97900040b86.png",
     "static/media/bg10.jpg": "/who-am-i-game/static/media/bg10.415a68a15f8652d2002b.jpg",
     "static/media/bg1.jpg": "/who-am-i-game/static/media/bg1.ad68a112f369070591b8.jpg",
@@ -15,10 +15,10 @@
     "static/media/bg4.jpg": "/who-am-i-game/static/media/bg4.2d10992f47e66a166711.jpg",
     "index.html": "/who-am-i-game/index.html",
     "main.c22fef27.css.map": "/who-am-i-game/static/css/main.c22fef27.css.map",
-    "main.2827bf49.js.map": "/who-am-i-game/static/js/main.2827bf49.js.map"
+    "main.92bd659a.js.map": "/who-am-i-game/static/js/main.92bd659a.js.map"
   },
   "entrypoints": [
     "static/css/main.c22fef27.css",
-    "static/js/main.2827bf49.js"
+    "static/js/main.92bd659a.js"
   ]
 }
