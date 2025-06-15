@@ -227,4 +227,15 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
   .player-avatar { width: 60px; height: 60px; }
   .player-name { font-size: 1rem; }
   .btn { padding: 10px 20px; font-size: 0.9rem; }
+
+  /* --- ИЗМЕНЕНИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ --- */
+  .character-display {
+    padding: 4px 8px;
+    margin-top: 8px;
+  }
+
+  .character-name {
+    font-size: 0.85rem; /* Уменьшаем размер шрифта для имени персонажа */
+    word-break: break-all; /* Позволяем длинным словам переноситься */
+  }
 }
