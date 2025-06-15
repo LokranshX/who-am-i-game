@@ -21,16 +21,12 @@ const io = new Server(server, {
     cors: corsOptions
 });
 
-// Мы больше не используем PORT, так как Vercel управляет этим сам
-// const PORT = process.env.PORT || 5000; 
-
 app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Backend server is running!');
 });
 
-// Вся логика Socket.IO остается без изменений
 io.on('connection', (socket) => {
     console.log(`Пользователь подключился: ${socket.id}`);
 
@@ -119,7 +115,7 @@ io.on('connection', (socket) => {
         try {
             gameManager.answerQuestion(gameCode, socket.id, answer);
             emitGameUpdate(gameCode);
-        } catch (error) => {
+        } catch (error) { // <--- ИСПРАВЛЕНИЕ ЗДЕСЬ
             socket.emit('gameError', error.message);
         }
     });
@@ -165,7 +161,8 @@ io.on('connection', (socket) => {
     });
 });
 
-// --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ---
-// Мы больше не запускаем сервер сами с помощью server.listen().
-// Вместо этого мы экспортируем его, чтобы Vercel мог запустить его для нас.
-module.exports = server;
+const PORT = process.env.PORT || 5000; 
+
+server.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
