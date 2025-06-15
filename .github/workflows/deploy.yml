@@ -1,45 +1,52 @@
+# .github/workflows/deploy.yml
+
 name: Deploy Frontend to GitHub Pages
 
-# Запускать этот воркфлоу при каждом пуше в ветку main
 on:
+  # Запускать рабочий процесс при любом пуше в ветку 'main'
   push:
     branches:
       - main
 
 jobs:
   build-and-deploy:
-    # Использовать последнюю версию Ubuntu
     runs-on: ubuntu-latest
+    
+    # Указываем, что все команды по умолчанию должны выполняться в папке frontend
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
-      # Шаг 1: Скачиваем код из репозитория
+      # 1. Получаем код из репозитория
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Шаг 2: Устанавливаем Node.js
+      # 2. Настраиваем Node.js для сборки
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Используем стабильную версию Node.js
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      # Шаг 3: Устанавливаем зависимости фронтенда
-      - name: Install Frontend Dependencies
-        run: npm install
-        working-directory: ./frontend # Указываем, что команду нужно выполнять в папке frontend
+      # 3. Устанавливаем зависимости фронтенда
+      - name: Install dependencies
+        run: npm ci
 
-      # Шаг 4: Собираем проект
-      - name: Build Frontend
+      # 4. Собираем проект с правильной переменной окружения
+      - name: Build project
         run: npm run build
-        working-directory: ./frontend
         env:
-          # Передаем наш секрет в процесс сборки
+          # !!! ЭТО САМАЯ ВАЖНАЯ ЧАСТЬ !!!
+          # Мы передаем наш секрет в процесс сборки, чтобы фронтенд
+          # знал, по какому адресу находится бэкенд на Render.
           REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
-
-      # Шаг 5: Деплоим собранный проект в ветку gh-pages
+          
+      # 5. Развертываем собранные файлы на GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          # Токен для аутентификации, предоставляется GitHub автоматически
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Папка, которую нужно опубликовать
+          # Указываем, что публиковать нужно из папки build внутри frontend
           publish_dir: ./frontend/build
