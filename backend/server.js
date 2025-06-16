@@ -72,6 +72,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- НОВЫЙ ОБРАБОТЧИК ---
+    // Вызывается, когда клиент перезагружает страницу и ему нужно актуальное состояние
+    socket.on('getGame', (gameCode) => {
+        try {
+            socket.join(gameCode); // Убедимся, что пользователь в комнате для обновлений
+            const game = gameManager.getGame(gameCode);
+            if (game) {
+                emitGameUpdate(gameCode);
+            } else {
+                socket.emit('gameError', 'Игра, к которой вы пытаетесь подключиться, не найдена.');
+            }
+        } catch(error) {
+            socket.emit('gameError', error.message);
+        }
+    });
+
     socket.on('getPublicGames', () => {
         socket.emit('publicGamesList', gameManager.getPublicGames());
     });
@@ -125,8 +141,6 @@ io.on('connection', (socket) => {
             socket.emit('gameError', error.message);
         }
     });
-
-    // Обработчик 'chatMessage' удален
 
     socket.on('leaveGame', (gameCode) => {
         try {

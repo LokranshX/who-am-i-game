@@ -1,6 +1,7 @@
 // frontend/src/components/GameRoom.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { socket } from '../socket';
 import PlayerCard from './PlayerCard';
 import HistoryLog from './HistoryLog';
 
@@ -8,16 +9,23 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
   const [questionInput, setQuestionInput] = useState('');
   const [guessInput, setGuessInput] = useState('');
   const navigate = useNavigate();
+  const { gameCode } = useParams();
 
   useEffect(() => {
+    // Если мы попали на страницу и у нас нет данных об игре, запрашиваем их
+    if (!game) {
+      if (!socket.connected) socket.connect();
+      socket.emit('getGame', gameCode);
+    }
+
     if (game && game.status === 'waiting') {
       navigate(`/lobby/${game.code}`);
     }
-  }, [game, navigate]);
+  }, [game, gameCode, navigate]);
 
-  // --- ИСПРАВЛЕНИЕ ---
+  // Добавлена более строгая проверка на наличие ключевых полей
   if (!game || !game.players || !game.actionLog) {
-    return <div className="loading-screen">Синхронизация с игровой комнатой...</div>;
+    return <div className="loading-screen">Подключение к игре {gameCode}...</div>;
   }
 
   const currentPlayer = game.players[game.currentPlayerIndex];

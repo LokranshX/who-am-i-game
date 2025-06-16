@@ -1,23 +1,30 @@
 // frontend/src/components/Lobby.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { socket } from '../socket';
 import PlayerCard from './PlayerCard';
 import HistoryLog from './HistoryLog';
 
 function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onLeaveGame }) {
   const [characterInput, setCharacterInput] = useState('');
   const navigate = useNavigate();
+  const { gameCode } = useParams();
 
   useEffect(() => {
+    // Если мы попали на страницу и у нас нет данных об игре, запрашиваем их
+    if (!game) {
+      if (!socket.connected) socket.connect();
+      socket.emit('getGame', gameCode);
+    }
+
     if (game && game.status === 'in-progress') {
       navigate(`/game/${game.code}`);
     }
-  }, [game, navigate]);
+  }, [game, gameCode, navigate]);
 
-  // --- ИСПРАВЛЕНИЕ ---
-  // Проверяем не только наличие game, но и его ключевых полей.
+  // Добавлена более строгая проверка на наличие ключевых полей
   if (!game || !game.players || !game.actionLog) {
-    return <div className="loading-screen">Синхронизация с игрой...</div>;
+    return <div className="loading-screen">Подключение к лобби {gameCode}...</div>;
   }
 
   const isHost = game.hostId === socketId;
@@ -36,7 +43,7 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
     <div className="glass-panel">
       <div className="room-header">
         <h1 className="room-title">Лобби игры: {game.code}</h1>
-        <p className="room-info">Вы: {playerName} {isHost && '(Хост)'}</p>
+        <p className="room-info">Вы: {playerName || 'Наблюдатель'} {isHost && '(Хост)'}</p>
       </div>
       <div className="room-layout">
         <div className="main-content">
