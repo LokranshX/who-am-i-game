@@ -3,50 +3,45 @@
 name: Deploy Frontend to GitHub Pages
 
 on:
-  # Запускать рабочий процесс при любом пуше в ветку 'main'
   push:
     branches:
-      - main
+      - main # Запускать при пуше в ветку main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
-    # Указываем, что все команды по умолчанию должны выполняться в папке frontend
-    defaults:
-      run:
-        working-directory: ./frontend
+    # --- ВОТ ВАЖНОЕ ИЗМЕНЕНИЕ ---
+    # Этот блок дает права рабочему процессу на запись в репозиторий
+    permissions:
+      contents: write
 
     steps:
-      # 1. Получаем код из репозитория
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Настраиваем Node.js для сборки
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '18' # Используем актуальную версию Node.js
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      # 3. Устанавливаем зависимости фронтенда
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+        working-directory: ./frontend
 
-      # 4. Собираем проект с правильной переменной окружения
       - name: Build project
         run: npm run build
+        working-directory: ./frontend
         env:
-          # !!! ЭТО САМАЯ ВАЖНАЯ ЧАСТЬ !!!
-          # Мы передаем наш секрет в процесс сборки, чтобы фронтенд
-          # знал, по какому адресу находится бэкенд на Render.
-          REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
+          # Если у вас есть переменные окружения для сборки, укажите их здесь
+          # Пример:
+          # REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
           
-      # 5. Развертываем собранные файлы на GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Указываем, что публиковать нужно из папки build внутри frontend
           publish_dir: ./frontend/build
+          # publish_branch: gh-pages # Эта ветка используется по умолчанию
