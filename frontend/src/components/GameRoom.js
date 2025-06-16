@@ -15,6 +15,7 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
     }
   }, [game, navigate]);
 
+  // --- ВОТ ИСПРАВЛЕНИЕ ---
   if (!game) {
     return <div className="loading-screen">Загрузка игровой комнаты...</div>;
   }

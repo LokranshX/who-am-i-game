@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlayerCard from './PlayerCard';
-import HistoryLog from './HistoryLog'; // <-- ИСПРАВЛЕННЫЙ ИМПОРТ
+import HistoryLog from './HistoryLog';
 
 function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onLeaveGame }) {
   const [characterInput, setCharacterInput] = useState('');
@@ -14,6 +14,8 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
     }
   }, [game, navigate]);
 
+  // --- ВОТ ИСПРАВЛЕНИЕ ---
+  // Если объект game еще не пришел с сервера, показываем заглушку.
   if (!game) {
     return <div className="loading-screen">Загрузка лобби...</div>;
   }
@@ -93,7 +95,6 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
           )}
         </div>
 
-        {/* Используем HistoryLog вместо Chat */}
         <div className="history-panel glass-panel">
           <HistoryLog events={game.actionLog} />
         </div>
