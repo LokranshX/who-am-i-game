@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlayerCard from './PlayerCard';
-import Chat from './Chat';
+import HistoryLog from './HistoryLog';
 
-function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onChatMessage, onLeaveGame }) {
+function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onLeaveGame }) {
   const [characterInput, setCharacterInput] = useState('');
   const navigate = useNavigate();
 
@@ -31,27 +31,19 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onC
   };
 
   return (
-    // Это главный контейнер для всего экрана лобби
     <div className="glass-panel">
-      
-      {/* --- Секция 1: Заголовок --- */}
       <div className="room-header">
         <h1 className="room-title">Лобби игры: {game.code}</h1>
         <p className="room-info">Вы: {playerName} {isHost && '(Хост)'}</p>
       </div>
 
-      {/* --- Секция 2: Основной макет (сетка из 2 колонок) --- */}
-      {/* Вот тот самый div, который создает сетку */}
       <div className="room-layout">
-        
-        {/* --- Левая колонка --- */}
         <div className="main-content">
-          
           <div className="players-section glass-panel">
             <h2>Игроки ({game.players.length})</h2>
             <div className="player-list">
               {game.players.map((player) => (
-                <PlayerCard key={player.id} player={player} isCurrentPlayer={player.id === socketId} />
+                <PlayerCard key={player.id} player={player} isSelf={player.id === socketId} />
               ))}
             </div>
           </div>
@@ -98,18 +90,13 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onC
           )}
         </div>
 
-        {/* --- Правая колонка (Чат) --- */}
-        {/* Панель чата теперь является прямым дочерним элементом .room-layout */}
-        <div className="chat-panel glass-panel">
-          <Chat messages={game.chatMessages} onSendMessage={onChatMessage} />
+        <div className="history-panel glass-panel">
+          <HistoryLog events={game.actionLog} />
         </div>
 
-        {/* --- Секция 3: Кнопка выхода (под сеткой) --- */}
-        {/* Эта кнопка также является дочерним элементом .room-layout, чтобы CSS мог ее правильно расположить */}
         <div className="exit-button-container">
             <button onClick={onLeaveGame} className="btn danger">Выйти из игры</button>
         </div>
-
       </div>
     </div>
   );

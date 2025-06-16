@@ -15,6 +15,18 @@ class GameManager {
         return code;
     }
 
+    // Новый метод для логирования структурированных действий
+    logGameAction(gameCode, action) {
+        const game = this.activeGames[gameCode];
+        if (game) {
+            const logEntry = { ...action, id: uuidv4(), timestamp: Date.now() };
+            game.actionLog.push(logEntry);
+            if (game.actionLog.length > 100) {
+                game.actionLog.splice(0, game.actionLog.length - 100);
+            }
+        }
+    }
+
     createGame(hostSocketId, hostName) {
         const player = {
             id: hostSocketId,
@@ -33,11 +45,11 @@ class GameManager {
             hostId: hostSocketId,
             currentPlayerIndex: 0,
             maxQuestionsPerTurn: 3,
-            chatMessages: [],
+            actionLog: [], // Заменили chatMessages на actionLog
             charactersPool: [],
             turnStartTime: null
         };
-        this.addChatMessage(gameCode, 'system', `${hostName} создал игру.`);
+        this.logGameAction(gameCode, { type: 'system', text: `${hostName} создал игру.` });
         return this.activeGames[gameCode];
     }
 
@@ -57,7 +69,7 @@ class GameManager {
             questionsAskedInTurn: 0
         };
         game.players.push(player);
-        this.addChatMessage(gameCode, 'system', `${playerName} присоединился к игре.`);
+        this.logGameAction(gameCode, { type: 'join', playerName });
         return game;
     }
 
@@ -69,13 +81,13 @@ class GameManager {
             if (playerIndex !== -1) {
                 const playerName = game.players[playerIndex].name;
                 game.players.splice(playerIndex, 1);
-                this.addChatMessage(gameCode, 'system', `${playerName} покинул игру.`);
+                this.logGameAction(gameCode, { type: 'leave', playerName });
 
                 if (game.hostId === playerSocketId) {
                     if (game.players.length > 0) {
                         game.hostId = game.players[0].id;
                         game.players[0].isHost = true;
-                        this.addChatMessage(gameCode, 'system', `${game.players[0].name} стал новым хостом.`);
+                        this.logGameAction(gameCode, { type: 'system', text: `${game.players[0].name} стал новым хостом.` });
                     } else {
                         delete this.activeGames[gameCode];
                         console.log(`Игра ${gameCode} удалена, так как все игроки покинули ее.`);
@@ -113,28 +125,13 @@ class GameManager {
             }));
     }
 
-    addChatMessage(gameCode, sender, message) {
-        const game = this.activeGames[gameCode];
-        if (game) {
-            game.chatMessages.push({
-                id: uuidv4(),
-                sender: sender,
-                message: message,
-                timestamp: Date.now()
-            });
-            if (game.chatMessages.length > 100) {
-                game.chatMessages.splice(0, game.chatMessages.length - 100);
-            }
-        }
-    }
-
     submitCharacter(gameCode, playerSocketId, characterName) {
         const game = this.activeGames[gameCode];
         if (!game || game.status !== 'waiting') throw new Error('Невозможно загадать персонажа в текущем состоянии игры.');
         const player = game.players.find(p => p.id === playerSocketId);
         if (player) {
             player.characterSubmitted = characterName.trim();
-            this.addChatMessage(gameCode, 'system', `${player.name} загадал персонажа.`);
+            this.logGameAction(gameCode, { type: 'submit', playerName: player.name });
         }
         return game;
     }
@@ -155,7 +152,6 @@ class GameManager {
             do {
                 assignedCharacter = shuffledCharacters[(index + attempts) % shuffledCharacters.length];
                 attempts++;
-            // ИЗМЕНЕНИЕ ЗДЕСЬ: Сравниваем в нижнем регистре
             } while (assignedCharacter.toLowerCase() === player.characterSubmitted.toLowerCase() && attempts <= shuffledCharacters.length);
 
             player.characterOnForehead = assignedCharacter;
@@ -163,8 +159,8 @@ class GameManager {
 
         game.currentPlayerIndex = Math.floor(Math.random() * game.players.length);
         game.turnStartTime = Date.now();
-        this.addChatMessage(gameCode, 'system', 'Игра началась! Удачи!');
-        this.addChatMessage(gameCode, 'system', `Первый ход у ${game.players[game.currentPlayerIndex].name}.`);
+        this.logGameAction(gameCode, { type: 'system', text: 'Игра началась! Удачи!' });
+        this.logGameAction(gameCode, { type: 'system', text: `Первый ход у ${game.players[game.currentPlayerIndex].name}.` });
         return game;
     }
 
@@ -175,7 +171,7 @@ class GameManager {
         if (currentPlayer.id !== playerSocketId) throw new Error('Сейчас не ваш ход.');
         if (currentPlayer.questionsAskedInTurn >= game.maxQuestionsPerTurn) throw new Error(`Вы задали максимальное количество вопросов (${game.maxQuestionsPerTurn}) за этот ход.`);
 
-        this.addChatMessage(gameCode, currentPlayer.name, question);
+        this.logGameAction(gameCode, { type: 'question', playerName: currentPlayer.name, text: question });
         return game;
     }
 
@@ -186,21 +182,20 @@ class GameManager {
         const currentPlayer = game.players[game.currentPlayerIndex];
         const characterOnForeheadOfCurrentPlayer = currentPlayer.characterOnForehead;
 
-        // ИЗМЕНЕНИЕ ЗДЕСЬ: Ищем владельца персонажа, сравнивая в нижнем регистре
         const playerWhoOwnsCharacter = game.players.find(p => p.characterSubmitted.toLowerCase() === characterOnForeheadOfCurrentPlayer.toLowerCase());
 
         if (!playerWhoOwnsCharacter || playerWhoOwnsCharacter.id !== playerSocketId) {
-            throw new Error('Вы не можете ответить на этот вопрос. Отвечает тот, кто загадал персонажа, который сейчас на лбу у спрашивающего.');
+            throw new Error('Вы не можете ответить на этот вопрос.');
         }
 
-        this.addChatMessage(gameCode, playerWhoOwnsCharacter.name, answer ? 'Да' : 'Нет');
+        this.logGameAction(gameCode, { type: 'answer', playerName: playerWhoOwnsCharacter.name, answer: answer ? 'Да' : 'Нет' });
 
         if (!answer) {
             this.nextTurn(gameCode);
         } else {
             currentPlayer.questionsAskedInTurn++;
             if (currentPlayer.questionsAskedInTurn >= game.maxQuestionsPerTurn) {
-                this.addChatMessage(gameCode, 'system', `${currentPlayer.name} задал максимальное количество вопросов. Ход переходит.`);
+                this.logGameAction(gameCode, { type: 'system', text: `${currentPlayer.name} задал максимальное количество вопросов. Ход переходит.` });
                 this.nextTurn(gameCode);
             }
         }
@@ -214,15 +209,15 @@ class GameManager {
         if (currentPlayer.id !== playerSocketId) throw new Error('Сейчас не ваш ход.');
 
         const correctCharacter = currentPlayer.characterOnForehead;
-        // ЭТА ЧАСТЬ УЖЕ РАБОТАЛА ПРАВИЛЬНО: Сравниваем в нижнем регистре
         const isCorrect = guess.trim().toLowerCase() === correctCharacter.toLowerCase();
+
+        this.logGameAction(gameCode, { type: 'guess', playerName: currentPlayer.name, text: guess, isCorrect });
 
         if (isCorrect) {
             currentPlayer.guessed = true;
-            this.addChatMessage(gameCode, 'system', `${currentPlayer.name} угадал своего персонажа: "${correctCharacter}"!`);
+            this.logGameAction(gameCode, { type: 'system', text: `${currentPlayer.name} угадал своего персонажа: "${correctCharacter}"!` });
             this.endGame(gameCode, `${currentPlayer.name} победил!`);
         } else {
-            this.addChatMessage(gameCode, 'system', `${currentPlayer.name} попытался угадать "${guess}", но это неверно.`);
             this.nextTurn(gameCode);
         }
         return game;
@@ -250,7 +245,7 @@ class GameManager {
         }
 
         game.turnStartTime = Date.now();
-        this.addChatMessage(gameCode, 'system', `Ход перешел к ${game.players[game.currentPlayerIndex].name}.`);
+        this.logGameAction(gameCode, { type: 'system', text: `Ход перешел к ${game.players[game.currentPlayerIndex].name}.` });
         return game;
     }
 
@@ -258,7 +253,7 @@ class GameManager {
         const game = this.activeGames[gameCode];
         if (game) {
             game.status = 'finished';
-            this.addChatMessage(gameCode, 'system', `Игра завершена: ${message}`);
+            this.logGameAction(gameCode, { type: 'system', text: `Игра завершена: ${message}` });
             setTimeout(() => {
                 delete this.activeGames[gameCode];
                 console.log(`Игра ${gameCode} удалена из памяти.`);

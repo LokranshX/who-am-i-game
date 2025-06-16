@@ -4,6 +4,7 @@
   --primary-color: #ff69b4;
   --secondary-color: #1e90ff;
   --danger-color: #ff4757;
+  --success-color: #2ed573;
   --text-color: #333;
   --text-light: #fff;
   --background-glass: rgba(255, 255, 255, 0.35);
@@ -17,9 +18,9 @@
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-  70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(255, 105, 180, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0); }
 }
 
 @keyframes pop-in {
@@ -28,14 +29,8 @@
 }
 
 @keyframes logo-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.8) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 body {
@@ -85,7 +80,7 @@ body {
 .btn.primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4); }
 .btn.secondary { background-color: var(--secondary-color); }
 .btn.secondary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4); }
-.btn.success { background-color: #2ed573; }
+.btn.success { background-color: var(--success-color); }
 .btn.success:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4); }
 .btn.danger { background-color: var(--danger-color); }
 .btn.danger:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4); }
@@ -115,17 +110,8 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
   align-items: flex-start;
 }
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.room-header {
-  text-align: center;
-  grid-column: 1 / -1;
-}
-
+.main-content { display: flex; flex-direction: column; gap: 20px; }
+.room-header { text-align: center; grid-column: 1 / -1; }
 .room-title { font-size: 2.5rem; color: var(--text-light); text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); margin: 0; }
 .room-info { font-size: 1.1rem; text-align: center; color: var(--text-light); margin-top: 5px; }
 
@@ -134,90 +120,42 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
 .submitted-message, .waiting-message { text-align: center; font-style: italic; color: var(--text-color); margin-top: 15px; }
 .start-game-section { text-align: center; }
 
-.player-card { padding: 15px; text-align: center; width: 150px; transition: all 0.3s ease; position: relative; animation: pop-in 0.5s ease-out forwards; }
+.player-card { padding: 15px; text-align: center; width: 140px; transition: all 0.3s ease; position: relative; animation: pop-in 0.5s ease-out forwards; }
 .player-card.guessed { opacity: 0.5; filter: grayscale(80%); transform: scale(0.9); }
-.player-avatar { width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); border: 3px solid var(--border-glass); box-shadow: 0 4px 15px var(--shadow-color); display: flex; justify-content: center; align-items: center; transition: all 0.3s ease; }
-.player-card.active-turn .player-avatar { border-color: var(--text-light); box-shadow: 0 0 20px var(--primary-color); animation: pulse 2s infinite; }
+.player-avatar { width: 70px; height: 70px; margin: 0 auto 10px; border-radius: 50%; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); border: 3px solid var(--border-glass); box-shadow: 0 4px 15px var(--shadow-color); display: flex; justify-content: center; align-items: center; transition: all 0.3s ease; }
+.player-card.active-turn .player-avatar { border-color: var(--text-light); box-shadow: 0 0 25px var(--primary-color); animation: pulse 1.5s infinite; }
 .player-name-container { display: flex; align-items: center; justify-content: center; gap: 5px; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 10px; }
-.player-name { font-size: 1.1rem; color: var(--text-light); font-weight: 600; }
-.ready-icon { color: #2ed573; font-size: 1rem; animation: pop-in 0.5s; }
+.player-name { font-size: 1rem; color: var(--text-light); font-weight: 600; }
+.ready-icon { color: var(--success-color); font-size: 1rem; animation: pop-in 0.5s; }
 
-.players-display {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  padding: 20px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.1);
-}
-.action-section {
-  padding: 20px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.1);
-}
+.character-display { margin-top: 8px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; }
+.character-name { font-weight: 700; color: var(--text-light); font-size: 0.9rem; word-break: break-word; }
 
-.chat-panel {
-  height: 70vh;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
+.players-display { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.1); }
+.action-section { padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.1); }
 
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
+.history-panel { height: 70vh; display: flex; flex-direction: column; padding: 20px; }
+.history-log-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.history-log-container h3 { text-align: center; margin-top: 0; color: var(--text-color); }
+.history-events { flex: 1; overflow-y: auto; padding-right: 10px; }
+.history-event { margin-bottom: 12px; line-height: 1.5; padding: 8px 12px; border-radius: 8px; background-color: rgba(255, 255, 255, 0.7); animation: fade-in-up 0.5s ease-out; }
+.history-event .svg-inline--fa { margin-right: 8px; }
+.history-event.event-type-system { background: none; font-style: italic; text-align: center; color: var(--text-light); font-weight: 600; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); }
+.history-event .icon-yes { color: var(--success-color); }
+.history-event .icon-no { color: var(--danger-color); }
+.history-event .correct-guess { color: var(--success-color); }
 
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 15px;
-  padding-right: 10px;
-}
-
-.chat-message { margin-bottom: 10px; line-height: 1.5; max-width: 90%; padding: 8px 12px; border-radius: 18px; word-wrap: break-word; animation: fade-in-up 0.4s ease-out; }
-.chat-message.system-message { background: none; font-style: italic; text-align: center; color: var(--text-light); font-weight: 600; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); max-width: 100%; }
-.chat-message:not(.system-message) { background-color: rgba(255, 255, 255, 0.8); }
-.message-sender { font-weight: 700; color: var(--primary-color); display: block; margin-bottom: 2px; }
-.message-text { color: #222; }
-.system-message .message-text { color: inherit; }
-.system-message .message-sender { color: #2ed573; }
-.chat-input-group { flex-shrink: 0; display: flex; flex-direction: row; gap: 10px; }
-.chat-input-group input { flex-grow: 1; }
-
-.exit-button-container {
-  grid-column: 1 / -1;
-  text-align: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-glass);
-}
+.exit-button-container { grid-column: 1 / -1; text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-glass); }
 
 @media (max-width: 992px) {
-  .room-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-panel {
-    height: auto;
-    max-height: 50vh;
-  }
-
+  .room-layout { grid-template-columns: 1fr; }
+  .history-panel { height: auto; max-height: 50vh; }
   .game-logo { max-width: 300px; }
   .room-title { font-size: 2rem; }
-
   .glass-panel { padding: 15px; }
   .room-layout { gap: 20px; }
-
-  .input-group {
-    flex-direction: column;
-  }
-  .input-group .btn {
-    width: 100%;
-  }
+  .input-group { flex-direction: column; }
+  .input-group .btn { width: 100%; }
 }
 
 @media (max-width: 480px) {
@@ -225,17 +163,7 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
   .room-title { font-size: 1.8rem; }
   .player-card { width: 120px; }
   .player-avatar { width: 60px; height: 60px; }
-  .player-name { font-size: 1rem; }
+  .player-name { font-size: 0.9rem; }
   .btn { padding: 10px 20px; font-size: 0.9rem; }
-
-  /* --- ИЗМЕНЕНИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ --- */
-  .character-display {
-    padding: 4px 8px;
-    margin-top: 8px;
-  }
-
-  .character-name {
-    font-size: 0.85rem; /* Уменьшаем размер шрифта для имени персонажа */
-    word-break: break-all; /* Позволяем длинным словам переноситься */
-  }
+  .character-name { font-size: 0.8rem; }
 }

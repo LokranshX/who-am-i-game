@@ -2,19 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlayerCard from './PlayerCard';
-import Chat from './Chat';
+import HistoryLog from './HistoryLog';
 
-function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion, onMakeGuess, onChatMessage, onLeaveGame }) {
+function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion, onMakeGuess, onLeaveGame }) {
   const [questionInput, setQuestionInput] = useState('');
   const [guessInput, setGuessInput] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!game || game.status === 'waiting' || game.status === 'finished') {
-      // Если игра закончилась, остаемся в комнате, чтобы видеть результаты
-      if (game && game.status === 'waiting') {
-        navigate(`/lobby/${game.code}`);
-      }
+    if (game && game.status === 'waiting') {
+      navigate(`/lobby/${game.code}`);
     }
   }, [game, navigate]);
 
@@ -27,10 +24,8 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
   const myPlayer = game.players.find(p => p.id === socketId);
   const hasGuessed = myPlayer?.guessed;
 
-  const lastMessage = game.chatMessages.length > 0 ? game.chatMessages[game.chatMessages.length - 1] : null;
-  // Проверяем, что последний ответивший - не тот, кто задал вопрос
-  const isQuestionPending = lastMessage && lastMessage.sender === currentPlayer?.name && game.players.some(p => p.id !== currentPlayer.id);
-
+  const lastAction = game.actionLog.length > 0 ? game.actionLog[game.actionLog.length - 1] : null;
+  const isQuestionPending = lastAction && lastAction.type === 'question';
 
   const handleAskQuestion = () => {
     if (questionInput.trim() && isMyTurn && !hasGuessed) {
@@ -75,7 +70,7 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
             return (
                 <div>
                   <h3>Ответьте на вопрос от {currentPlayer.name}:</h3>
-                  <p>"{lastMessage.message}"</p>
+                  <p>"{lastAction.text}"</p>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                     <button onClick={() => onAnswerQuestion(true)} className="btn success">Да</button>
                     <button onClick={() => onAnswerQuestion(false)} className="btn danger">Нет</button>
@@ -104,8 +99,6 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
               <PlayerCard
                 key={player.id}
                 player={player}
-                // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-                // Передаем флаг, является ли эта карточка карточкой текущего пользователя
                 isSelf={player.id === socketId}
                 isTurn={player.id === currentPlayer?.id}
               />
@@ -130,8 +123,8 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
           )}
         </div>
 
-        <div className="chat-panel glass-panel">
-          <Chat messages={game.chatMessages} onSendMessage={onChatMessage} />
+        <div className="history-panel glass-panel">
+          <HistoryLog events={game.actionLog} />
         </div>
 
         <div className="exit-button-container">

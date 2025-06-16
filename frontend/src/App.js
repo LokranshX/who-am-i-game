@@ -1,12 +1,13 @@
 // frontend/src/App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { socket } from './socket';
-import Home from './components/Home';
-import Lobby from './components/Lobby';
-import GameRoom from './components/GameRoom';
 
-// --- Массив изображений (остается без изменений) ---
+// Ленивая загрузка компонентов
+const Home = lazy(() => import('./components/Home'));
+const Lobby = lazy(() => import('./components/Lobby'));
+const GameRoom = lazy(() => import('./components/GameRoom'));
+
 import bg1 from './images/bg1.jpg';
 import bg2 from './images/bg2.jpg';
 import bg3 from './images/bg3.jpg';
@@ -26,12 +27,10 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [gameCode, setGameCode] = useState('');
   const [game, setGame] = useState(null);
-  const [characterOnForehead, setCharacterOnForehead] = useState(null);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
-  // Логика смены фона (остается без изменений)
   useEffect(() => {
     let currentIndex = 0;
     document.body.style.backgroundImage = `url(${backgroundImages[currentIndex]})`;
@@ -50,7 +49,6 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Логика сокетов (остается без изменений)
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Подключено к серверу Socket.IO');
@@ -59,7 +57,6 @@ function App() {
     socket.on('disconnect', () => {
       console.log('Отключено от сервера Socket.IO');
       setGame(null);
-      setCharacterOnForehead(null);
       setGameCode('');
       setError('Вы были отключены от сервера.');
       navigate('/');
@@ -72,9 +69,6 @@ function App() {
       setGame(updatedGame);
       setError('');
     });
-    socket.on('characterAssigned', (character) => {
-      setCharacterOnForehead(character);
-    });
     socket.on('gameError', (message) => {
       setError(message);
       console.error('Ошибка игры:', message);
@@ -82,16 +76,14 @@ function App() {
     socket.on('gameEnded', (message) => {
       setError(message);
       setGame(null);
-      setCharacterOnForehead(null);
       setGameCode('');
-      setTimeout(() => navigate('/'), 1000);
+      setTimeout(() => navigate('/'), 5000);
     });
     return () => {
       socket.off('connect');
       socket.off('disconnect');
       socket.off('gameCreated');
       socket.off('gameUpdate');
-      socket.off('characterAssigned');
       socket.off('gameError');
       socket.off('gameEnded');
     };
@@ -116,7 +108,6 @@ function App() {
       socket.emit('leaveGame', gameCode);
     }
     setGame(null);
-    setCharacterOnForehead(null);
     setGameCode('');
     navigate('/');
   };
@@ -124,46 +115,44 @@ function App() {
   return (
     <div className="app-container">
       {error && <div className="error-message">{error}</div>}
-      <Routes>
-        <Route path="/" element={<Home onCreateGame={handleCreateGame} onJoinGame={handleJoinGame} />} />
-        <Route
-          path="/lobby/:gameCode"
-          element={
-            <Lobby
-              game={game}
-              playerName={playerName}
-              socketId={socket.id}
-              onStartGame={() => socket.emit('startGame', gameCode)}
-              onSubmitCharacter={(char) => socket.emit('submitCharacter', gameCode, char)}
-              onChatMessage={(msg) => socket.emit('chatMessage', gameCode, msg)}
-              onLeaveGame={handleLeaveGame}
-            />
-          }
-        />
-        <Route
-          path="/game/:gameCode"
-          element={
-            <GameRoom
-              game={game}
-              playerName={playerName}
-              socketId={socket.id}
-              characterOnForehead={characterOnForehead}
-              onAskQuestion={(q) => socket.emit('askQuestion', gameCode, q)}
-              onAnswerQuestion={(a) => socket.emit('answerQuestion', gameCode, a)}
-              onMakeGuess={(g) => socket.emit('makeGuess', gameCode, g)}
-              onChatMessage={(msg) => socket.emit('chatMessage', gameCode, msg)}
-              onLeaveGame={handleLeaveGame}
-            />
-          }
-        />
-      </Routes>
+      <Suspense fallback={<div className="loading-screen">Загрузка...</div>}>
+        <Routes>
+          <Route path="/" element={<Home onCreateGame={handleCreateGame} onJoinGame={handleJoinGame} />} />
+          <Route
+            path="/lobby/:gameCode"
+            element={
+              <Lobby
+                game={game}
+                playerName={playerName}
+                socketId={socket.id}
+                onStartGame={() => socket.emit('startGame', gameCode)}
+                onSubmitCharacter={(char) => socket.emit('submitCharacter', gameCode, char)}
+                onLeaveGame={handleLeaveGame}
+              />
+            }
+          />
+          <Route
+            path="/game/:gameCode"
+            element={
+              <GameRoom
+                game={game}
+                playerName={playerName}
+                socketId={socket.id}
+                onAskQuestion={(q) => socket.emit('askQuestion', gameCode, q)}
+                onAnswerQuestion={(a) => socket.emit('answerQuestion', gameCode, a)}
+                onMakeGuess={(g) => socket.emit('makeGuess', gameCode, g)}
+                onLeaveGame={handleLeaveGame}
+              />
+            }
+          />
+        </Routes>
+      </Suspense>
     </div>
   );
 }
 
 export default function AppWrapper() {
   return (
-    // --- ИЗМЕНЕНИЕ ПРЯМО ЗДЕСЬ ---
     <Router basename="/who-am-i-game">
       <App />
     </Router>
