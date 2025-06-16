@@ -7,7 +7,15 @@ class GameManager {
         this.activeGames = {};
     }
 
-    // ... (generateGameCode и logGameAction без изменений) ...
+    // --- ВОТ ВОССТАНОВЛЕННАЯ ФУНКЦИЯ ---
+    generateGameCode() {
+        let code;
+        do {
+            code = Math.random().toString(36).substring(2, 7).toUpperCase();
+        } while (this.activeGames[code]);
+        return code;
+    }
+
     logGameAction(gameCode, action) {
         const game = this.activeGames[gameCode];
         if (game) {
@@ -19,20 +27,19 @@ class GameManager {
         }
     }
 
-    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
     createGame(hostSocketId, playerData) {
         const { name, avatarId } = playerData;
         const player = {
             id: hostSocketId,
             name: name,
-            avatarId: avatarId, // Добавили аватарку
+            avatarId: avatarId,
             isHost: true,
             characterSubmitted: null,
             characterOnForehead: null,
             guessed: false,
             questionsAskedInTurn: 0
         };
-        const gameCode = this.generateGameCode();
+        const gameCode = this.generateGameCode(); // Теперь эта строка будет работать
         this.activeGames[gameCode] = {
             code: gameCode,
             players: [player],
@@ -48,7 +55,6 @@ class GameManager {
         return this.activeGames[gameCode];
     }
 
-    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
     joinGame(gameCode, playerSocketId, playerData) {
         const { name, avatarId } = playerData;
         const game = this.activeGames[gameCode];
@@ -59,7 +65,7 @@ class GameManager {
         const player = {
             id: playerSocketId,
             name: name,
-            avatarId: avatarId, // Добавили аватарку
+            avatarId: avatarId,
             isHost: false,
             characterSubmitted: null,
             characterOnForehead: null,
@@ -71,7 +77,6 @@ class GameManager {
         return game;
     }
 
-    // ... (остальные методы без изменений) ...
     leaveGame(playerSocketId) {
         for (const gameCode in this.activeGames) {
             const game = this.activeGames[gameCode];
