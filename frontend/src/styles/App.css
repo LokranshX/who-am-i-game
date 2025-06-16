@@ -91,6 +91,52 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
 .input-group label { font-weight: 600; color: var(--text-color); text-align: left; }
 
 .home-container { text-align: center; padding: 30px; max-width: 500px; margin: auto; }
+/* --- СТИЛИ ДЛЯ ВЫБОРА АВАТАРОК --- */
+.avatar-selection-container {
+  margin-bottom: 30px;
+}
+.avatar-selection-container h3 {
+  color: var(--text-light);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  margin-bottom: 15px;
+}
+.avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.avatar-option {
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 4px;
+  transition: all 0.2s ease-in-out;
+}
+.avatar-option img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: block;
+  border: 3px solid transparent;
+}
+.avatar-option.selected {
+  background-color: var(--primary-color);
+}
+.avatar-option.selected img {
+  border-color: var(--text-light);
+}
+
+/* --- ИЗМЕНЕНИЕ СТИЛЕЙ КАРТОЧКИ ИГРОКА --- */
+.player-avatar {
+  /* ... старые стили ... */
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  overflow: hidden; /* Прячем части картинки, выходящие за круг */
+}
+.player-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Масштабирует картинку, чтобы она заполнила контейнер */
+}
 
 .game-logo {
   max-width: 400px;

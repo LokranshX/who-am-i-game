@@ -1,7 +1,5 @@
 // frontend/src/App.js
 
-// --- НАЧАЛО БЛОКА ИМПОРТОВ ---
-// Все импорты сгруппированы здесь, в самом верху файла
 import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { socket } from './socket';
@@ -18,10 +16,7 @@ import bg7 from './images/bg7.jpg';
 import bg8 from './images/bg8.jpg';
 import bg9 from './images/bg9.jpg';
 import bg10 from './images/bg10.jpg';
-// --- КОНЕЦ БЛОКА ИМПОРТОВ ---
 
-
-// Ленивая загрузка компонентов теперь идет после всех импортов
 const Home = lazy(() => import('./components/Home'));
 const Lobby = lazy(() => import('./components/Lobby'));
 const GameRoom = lazy(() => import('./components/GameRoom'));
@@ -110,17 +105,19 @@ function App() {
     };
   }, [navigate]);
 
-  const handleCreateGame = (name) => {
+  // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+  const handleCreateGame = (playerData) => {
     if (!socket.connected) socket.connect();
-    setPlayerName(name);
-    socket.emit('createGame', name);
+    setPlayerName(playerData.name);
+    socket.emit('createGame', playerData);
   };
 
-  const handleJoinGame = (code, name) => {
+  // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+  const handleJoinGame = (code, playerData) => {
     if (!socket.connected) socket.connect();
-    setPlayerName(name);
+    setPlayerName(playerData.name);
     setGameCode(code);
-    socket.emit('joinGame', code, name);
+    socket.emit('joinGame', code, playerData);
     navigate(`/lobby/${code}`);
   };
 

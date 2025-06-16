@@ -8,7 +8,11 @@ function PlayerCard({ player, isSelf, isTurn }) {
 
   return (
     <div className={cardClass}>
-      <div className="player-avatar"></div>
+      {/* --- ИЗМЕНЕНИЕ ЗДЕСЬ --- */}
+      <div className="player-avatar">
+        <img src={player.avatarId} alt={player.name} className="player-avatar-img" />
+      </div>
+      
       <div className="player-name-container">
         <h3 className="player-name">{player.name}</h3>
         {player.characterSubmitted && !player.characterOnForehead && !player.guessed && (

@@ -1,13 +1,20 @@
+// frontend/src/components/Home.js
 import React, { useState } from 'react';
 import logo from '../images/logo.png';
+
+// Создаем массив путей к аватаркам
+const avatars = Array.from({ length: 10 }, (_, i) => `/who-am-i-game/avatars/avatar${i + 1}.png`);
 
 function Home({ onCreateGame, onJoinGame }) {
   const [playerName, setPlayerName] = useState('');
   const [joinGameCode, setJoinGameCode] = useState('');
+  // Состояние для выбранной аватарки, по умолчанию первая
+  const [selectedAvatar, setSelectedAvatar] = useState(avatars[0]);
 
   const handleCreate = () => {
     if (playerName.trim()) {
-      onCreateGame(playerName.trim());
+      // Передаем объект с именем и аватаркой
+      onCreateGame({ name: playerName.trim(), avatarId: selectedAvatar });
     } else {
       alert('Пожалуйста, введите ваше имя.');
     }
@@ -15,7 +22,8 @@ function Home({ onCreateGame, onJoinGame }) {
 
   const handleJoin = () => {
     if (playerName.trim() && joinGameCode.trim()) {
-      onJoinGame(joinGameCode.trim().toUpperCase(), playerName.trim());
+      // Передаем объект с именем и аватаркой
+      onJoinGame(joinGameCode.trim().toUpperCase(), { name: playerName.trim(), avatarId: selectedAvatar });
     } else {
       alert('Пожалуйста, введите ваше имя и код игры.');
     }
@@ -28,6 +36,23 @@ function Home({ onCreateGame, onJoinGame }) {
       <p className="game-description">
         Угадай персонажа, имя которого написано у тебя на лбу, задавая вопросы другим игрокам!
       </p>
+
+      {/* --- НОВЫЙ БЛОК: ВЫБОР АВАТАРКИ --- */}
+      <div className="avatar-selection-container">
+        <h3>Выберите аватарку:</h3>
+        <div className="avatar-grid">
+          {avatars.map((avatarSrc) => (
+            <div
+              key={avatarSrc}
+              className={`avatar-option ${selectedAvatar === avatarSrc ? 'selected' : ''}`}
+              onClick={() => setSelectedAvatar(avatarSrc)}
+            >
+              <img src={avatarSrc} alt={`Аватар ${avatarSrc}`} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* --- КОНЕЦ НОВОГО БЛОКА --- */}
 
       <div className="input-group">
         <label htmlFor="playerName">Ваше имя:</label>

@@ -7,15 +7,7 @@ class GameManager {
         this.activeGames = {};
     }
 
-    generateGameCode() {
-        let code;
-        do {
-            code = Math.random().toString(36).substring(2, 7).toUpperCase();
-        } while (this.activeGames[code]);
-        return code;
-    }
-
-    // Новый метод для логирования структурированных действий
+    // ... (generateGameCode и logGameAction без изменений) ...
     logGameAction(gameCode, action) {
         const game = this.activeGames[gameCode];
         if (game) {
@@ -27,10 +19,13 @@ class GameManager {
         }
     }
 
-    createGame(hostSocketId, hostName) {
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    createGame(hostSocketId, playerData) {
+        const { name, avatarId } = playerData;
         const player = {
             id: hostSocketId,
-            name: hostName,
+            name: name,
+            avatarId: avatarId, // Добавили аватарку
             isHost: true,
             characterSubmitted: null,
             characterOnForehead: null,
@@ -45,15 +40,17 @@ class GameManager {
             hostId: hostSocketId,
             currentPlayerIndex: 0,
             maxQuestionsPerTurn: 3,
-            actionLog: [], // Заменили chatMessages на actionLog
+            actionLog: [],
             charactersPool: [],
             turnStartTime: null
         };
-        this.logGameAction(gameCode, { type: 'system', text: `${hostName} создал игру.` });
+        this.logGameAction(gameCode, { type: 'system', text: `${name} создал игру.` });
         return this.activeGames[gameCode];
     }
 
-    joinGame(gameCode, playerSocketId, playerName) {
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    joinGame(gameCode, playerSocketId, playerData) {
+        const { name, avatarId } = playerData;
         const game = this.activeGames[gameCode];
         if (!game) throw new Error('Игра не найдена.');
         if (game.status !== 'waiting') throw new Error('Игра уже началась или завершена.');
@@ -61,7 +58,8 @@ class GameManager {
 
         const player = {
             id: playerSocketId,
-            name: playerName,
+            name: name,
+            avatarId: avatarId, // Добавили аватарку
             isHost: false,
             characterSubmitted: null,
             characterOnForehead: null,
@@ -69,10 +67,11 @@ class GameManager {
             questionsAskedInTurn: 0
         };
         game.players.push(player);
-        this.logGameAction(gameCode, { type: 'join', playerName });
+        this.logGameAction(gameCode, { type: 'join', playerName: name });
         return game;
     }
 
+    // ... (остальные методы без изменений) ...
     leaveGame(playerSocketId) {
         for (const gameCode in this.activeGames) {
             const game = this.activeGames[gameCode];

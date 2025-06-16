@@ -45,12 +45,9 @@ io.on('connection', (socket) => {
     const emitGameUpdate = (gameCode) => {
         const game = gameManager.getGame(gameCode);
         if (game) {
-            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
             const publicGameData = {
                 ...game,
                 players: game.players.map(p => {
-                    // Если игра уже началась или завершена, безопасно отправлять имена загаданных персонажей.
-                    // Если мы в лобби, то отправляем только булево значение (true/false).
                     const characterSubmitted = (game.status === 'in-progress' || game.status === 'finished')
                         ? p.characterSubmitted
                         : !!p.characterSubmitted;
@@ -58,9 +55,10 @@ io.on('connection', (socket) => {
                     return {
                         id: p.id,
                         name: p.name,
+                        avatarId: p.avatarId, // Добавили аватарку для отправки
                         isHost: p.isHost,
                         guessed: p.guessed,
-                        characterSubmitted: characterSubmitted, // Используем новую переменную
+                        characterSubmitted: characterSubmitted,
                         characterOnForehead: p.characterOnForehead,
                         questionsAskedInTurn: p.questionsAskedInTurn
                     };
@@ -72,9 +70,10 @@ io.on('connection', (socket) => {
         }
     };
 
-    socket.on('createGame', (playerName) => {
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    socket.on('createGame', (playerData) => {
         try {
-            const game = gameManager.createGame(socket.id, playerName);
+            const game = gameManager.createGame(socket.id, playerData);
             socket.join(game.code);
             socket.emit('gameCreated', game.code);
             emitGameUpdate(game.code);
@@ -83,9 +82,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('joinGame', (gameCode, playerName) => {
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    socket.on('joinGame', (gameCode, playerData) => {
         try {
-            const game = gameManager.joinGame(gameCode, socket.id, playerName);
+            const game = gameManager.joinGame(gameCode, socket.id, playerData);
             socket.join(game.code);
             emitGameUpdate(game.code);
         } catch (error) {
@@ -107,6 +107,7 @@ io.on('connection', (socket) => {
         }
     });
 
+    // ... (остальные обработчики без изменений) ...
     socket.on('getPublicGames', () => {
         socket.emit('publicGamesList', gameManager.getPublicGames());
     });
