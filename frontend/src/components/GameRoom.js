@@ -15,9 +15,9 @@ function GameRoom({ game, playerName, socketId, onAskQuestion, onAnswerQuestion,
     }
   }, [game, navigate]);
 
-  // --- ВОТ ИСПРАВЛЕНИЕ ---
-  if (!game) {
-    return <div className="loading-screen">Загрузка игровой комнаты...</div>;
+  // --- ИСПРАВЛЕНИЕ ---
+  if (!game || !game.players || !game.actionLog) {
+    return <div className="loading-screen">Синхронизация с игровой комнатой...</div>;
   }
 
   const currentPlayer = game.players[game.currentPlayerIndex];

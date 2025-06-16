@@ -14,10 +14,10 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
     }
   }, [game, navigate]);
 
-  // --- ВОТ ИСПРАВЛЕНИЕ ---
-  // Если объект game еще не пришел с сервера, показываем заглушку.
-  if (!game) {
-    return <div className="loading-screen">Загрузка лобби...</div>;
+  // --- ИСПРАВЛЕНИЕ ---
+  // Проверяем не только наличие game, но и его ключевых полей.
+  if (!game || !game.players || !game.actionLog) {
+    return <div className="loading-screen">Синхронизация с игрой...</div>;
   }
 
   const isHost = game.hostId === socketId;
@@ -34,16 +34,12 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
 
   return (
     <div className="glass-panel">
-      
       <div className="room-header">
         <h1 className="room-title">Лобби игры: {game.code}</h1>
         <p className="room-info">Вы: {playerName} {isHost && '(Хост)'}</p>
       </div>
-
       <div className="room-layout">
-        
         <div className="main-content">
-          
           <div className="players-section glass-panel">
             <h2>Игроки ({game.players.length})</h2>
             <div className="player-list">
@@ -52,7 +48,6 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
               ))}
             </div>
           </div>
-
           <div className="character-submission-section glass-panel">
             <h2>Загадайте персонажа</h2>
             {!hasSubmittedCharacter ? (
@@ -72,7 +67,6 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
               <p className="submitted-message">Вы загадали персонажа! Ожидаем других.</p>
             )}
           </div>
-
           {isHost && (
             <div className="start-game-section">
               <button
@@ -94,15 +88,12 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
             </div>
           )}
         </div>
-
         <div className="history-panel glass-panel">
           <HistoryLog events={game.actionLog} />
         </div>
-
         <div className="exit-button-container">
             <button onClick={onLeaveGame} className="btn danger">Выйти из игры</button>
         </div>
-
       </div>
     </div>
   );
