@@ -9,16 +9,13 @@ const cors = require('cors');
 
 const app = express();
 
-// --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
-// Мы создаем список разрешенных адресов
 const allowedOrigins = [
-  'http://localhost:3000', // Для локальной разработки
-  'https://lokranshx.github.io' // Ваш опубликованный сайт
+  'http://localhost:3000',
+  'https://lokranshx.github.io'
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Если запрос приходит с одного из разрешенных адресов (или это не браузерный запрос), разрешаем его
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -33,7 +30,7 @@ app.use(cors(corsOptions));
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: corsOptions // Применяем те же опции для Socket.IO
+    cors: corsOptions
 });
 
 app.use(express.json());
@@ -48,17 +45,26 @@ io.on('connection', (socket) => {
     const emitGameUpdate = (gameCode) => {
         const game = gameManager.getGame(gameCode);
         if (game) {
+            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
             const publicGameData = {
                 ...game,
-                players: game.players.map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    isHost: p.isHost,
-                    guessed: p.guessed,
-                    characterSubmitted: !!p.characterSubmitted,
-                    characterOnForehead: p.characterOnForehead,
-                    questionsAskedInTurn: p.questionsAskedInTurn
-                }))
+                players: game.players.map(p => {
+                    // Если игра уже началась или завершена, безопасно отправлять имена загаданных персонажей.
+                    // Если мы в лобби, то отправляем только булево значение (true/false).
+                    const characterSubmitted = (game.status === 'in-progress' || game.status === 'finished')
+                        ? p.characterSubmitted
+                        : !!p.characterSubmitted;
+
+                    return {
+                        id: p.id,
+                        name: p.name,
+                        isHost: p.isHost,
+                        guessed: p.guessed,
+                        characterSubmitted: characterSubmitted, // Используем новую переменную
+                        characterOnForehead: p.characterOnForehead,
+                        questionsAskedInTurn: p.questionsAskedInTurn
+                    };
+                })
             };
             io.to(gameCode).emit('gameUpdate', publicGameData);
         } else {
