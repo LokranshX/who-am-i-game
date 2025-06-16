@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/who-am-i-game/static/css/main.9fad12c6.css",
+    "main.css": "/who-am-i-game/static/css/main.e862606a.css",
     "main.js": "/who-am-i-game/static/js/main.1e17db2d.js",
     "static/js/462.cf7fde54.chunk.js": "/who-am-i-game/static/js/462.cf7fde54.chunk.js",
     "static/js/433.8d57b13d.chunk.js": "/who-am-i-game/static/js/433.8d57b13d.chunk.js",
@@ -17,14 +17,14 @@
     "static/media/bg5.jpg": "/who-am-i-game/static/media/bg5.0d42c2b2fa9e2baa12a4.jpg",
     "static/media/bg4.jpg": "/who-am-i-game/static/media/bg4.2d10992f47e66a166711.jpg",
     "index.html": "/who-am-i-game/index.html",
-    "main.9fad12c6.css.map": "/who-am-i-game/static/css/main.9fad12c6.css.map",
+    "main.e862606a.css.map": "/who-am-i-game/static/css/main.e862606a.css.map",
     "main.1e17db2d.js.map": "/who-am-i-game/static/js/main.1e17db2d.js.map",
     "462.cf7fde54.chunk.js.map": "/who-am-i-game/static/js/462.cf7fde54.chunk.js.map",
     "433.8d57b13d.chunk.js.map": "/who-am-i-game/static/js/433.8d57b13d.chunk.js.map",
     "340.18f83a8e.chunk.js.map": "/who-am-i-game/static/js/340.18f83a8e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9fad12c6.css",
+    "static/css/main.e862606a.css",
     "static/js/main.1e17db2d.js"
   ]
 }
