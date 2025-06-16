@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlayerCard from './PlayerCard';
-import HistoryLog from './HistoryLog';
+import HistoryLog from './HistoryLog'; // <-- ИСПРАВЛЕННЫЙ ИМПОРТ
 
 function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onLeaveGame }) {
   const [characterInput, setCharacterInput] = useState('');
@@ -32,13 +32,16 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
 
   return (
     <div className="glass-panel">
+      
       <div className="room-header">
         <h1 className="room-title">Лобби игры: {game.code}</h1>
         <p className="room-info">Вы: {playerName} {isHost && '(Хост)'}</p>
       </div>
 
       <div className="room-layout">
+        
         <div className="main-content">
+          
           <div className="players-section glass-panel">
             <h2>Игроки ({game.players.length})</h2>
             <div className="player-list">
@@ -90,6 +93,7 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
           )}
         </div>
 
+        {/* Используем HistoryLog вместо Chat */}
         <div className="history-panel glass-panel">
           <HistoryLog events={game.actionLog} />
         </div>
@@ -97,6 +101,7 @@ function Lobby({ game, playerName, socketId, onStartGame, onSubmitCharacter, onL
         <div className="exit-button-container">
             <button onClick={onLeaveGame} className="btn danger">Выйти из игры</button>
         </div>
+
       </div>
     </div>
   );
