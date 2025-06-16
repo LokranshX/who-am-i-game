@@ -1,12 +1,10 @@
 // frontend/src/App.js
+
+// --- БЛОК ИМПОРТОВ ---
+// Все импорты должны быть здесь, в самом верху файла
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { socket } from './socket';
-
-// Ленивая загрузка компонентов
-const Home = lazy(() => import('./components/Home'));
-const Lobby = lazy(() => import('./components/Lobby'));
-const GameRoom = lazy(() => import('./components/GameRoom'));
 
 import bg1 from './images/bg1.jpg';
 import bg2 from './images/bg2.jpg';
@@ -18,6 +16,14 @@ import bg7 from './images/bg7.jpg';
 import bg8 from './images/bg8.jpg';
 import bg9 from './images/bg9.jpg';
 import bg10 from './images/bg10.jpg';
+
+// --- КОНЕЦ БЛОКА ИМПОРТОВ ---
+
+
+// Ленивая загрузка компонентов теперь идет после всех импортов
+const Home = lazy(() => import('./components/Home'));
+const Lobby = lazy(() => import('./components/Lobby'));
+const GameRoom = lazy(() => import('./components/GameRoom'));
 
 const backgroundImages = [
   bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9, bg10
