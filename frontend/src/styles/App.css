@@ -166,4 +166,28 @@ input[type="text"]:focus { outline: none; border-color: var(--primary-color); bo
   .player-name { font-size: 0.9rem; }
   .btn { padding: 10px 20px; font-size: 0.9rem; }
   .character-name { font-size: 0.8rem; }
+  .music-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--background-glass);
+  border: 1px solid var(--border-glass);
+  color: var(--text-light);
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.music-toggle-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.5);
+}
 }
