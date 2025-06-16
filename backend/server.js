@@ -9,16 +9,31 @@ const cors = require('cors');
 
 const app = express();
 
+// --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
+// Мы создаем список разрешенных адресов
+const allowedOrigins = [
+  'http://localhost:3000', // Для локальной разработки
+  'https://lokranshx.github.io' // Ваш опубликованный сайт
+];
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    // Если запрос приходит с одного из разрешенных адресов (или это не браузерный запрос), разрешаем его
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ["GET", "POST"]
 };
+
 app.use(cors(corsOptions));
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: corsOptions
+    cors: corsOptions // Применяем те же опции для Socket.IO
 });
 
 app.use(express.json());
@@ -72,11 +87,9 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- НОВЫЙ ОБРАБОТЧИК ---
-    // Вызывается, когда клиент перезагружает страницу и ему нужно актуальное состояние
     socket.on('getGame', (gameCode) => {
         try {
-            socket.join(gameCode); // Убедимся, что пользователь в комнате для обновлений
+            socket.join(gameCode);
             const game = gameManager.getGame(gameCode);
             if (game) {
                 emitGameUpdate(gameCode);
