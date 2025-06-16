@@ -1,10 +1,10 @@
 {
   "files": {
     "main.css": "/who-am-i-game/static/css/main.7337aa08.css",
-    "main.js": "/who-am-i-game/static/js/main.545b2339.js",
+    "main.js": "/who-am-i-game/static/js/main.c763da50.js",
     "static/js/462.b84ecf64.chunk.js": "/who-am-i-game/static/js/462.b84ecf64.chunk.js",
-    "static/js/433.6aaad726.chunk.js": "/who-am-i-game/static/js/433.6aaad726.chunk.js",
-    "static/js/340.cf35f49e.chunk.js": "/who-am-i-game/static/js/340.cf35f49e.chunk.js",
+    "static/js/433.b64f74df.chunk.js": "/who-am-i-game/static/js/433.b64f74df.chunk.js",
+    "static/js/340.bd7dd626.chunk.js": "/who-am-i-game/static/js/340.bd7dd626.chunk.js",
     "static/js/446.e90bc0ef.chunk.js": "/who-am-i-game/static/js/446.e90bc0ef.chunk.js",
     "static/media/logo.png": "/who-am-i-game/static/media/logo.2b7aa9d7d97900040b86.png",
     "static/media/bg10.jpg": "/who-am-i-game/static/media/bg10.415a68a15f8652d2002b.jpg",
@@ -19,14 +19,14 @@
     "static/media/bg4.jpg": "/who-am-i-game/static/media/bg4.2d10992f47e66a166711.jpg",
     "index.html": "/who-am-i-game/index.html",
     "main.7337aa08.css.map": "/who-am-i-game/static/css/main.7337aa08.css.map",
-    "main.545b2339.js.map": "/who-am-i-game/static/js/main.545b2339.js.map",
+    "main.c763da50.js.map": "/who-am-i-game/static/js/main.c763da50.js.map",
     "462.b84ecf64.chunk.js.map": "/who-am-i-game/static/js/462.b84ecf64.chunk.js.map",
-    "433.6aaad726.chunk.js.map": "/who-am-i-game/static/js/433.6aaad726.chunk.js.map",
-    "340.cf35f49e.chunk.js.map": "/who-am-i-game/static/js/340.cf35f49e.chunk.js.map",
+    "433.b64f74df.chunk.js.map": "/who-am-i-game/static/js/433.b64f74df.chunk.js.map",
+    "340.bd7dd626.chunk.js.map": "/who-am-i-game/static/js/340.bd7dd626.chunk.js.map",
     "446.e90bc0ef.chunk.js.map": "/who-am-i-game/static/js/446.e90bc0ef.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7337aa08.css",
-    "static/js/main.545b2339.js"
+    "static/js/main.c763da50.js"
   ]
 }
