@@ -5,14 +5,13 @@ name: Deploy Frontend to GitHub Pages
 on:
   push:
     branches:
-      - main # Запускать при пуше в ветку main
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
-    # --- ВОТ ВАЖНОЕ ИЗМЕНЕНИЕ ---
-    # Этот блок дает права рабочему процессу на запись в репозиторий
+    # Даем права на запись, чтобы экшен мог опубликовать сборку
     permissions:
       contents: write
 
@@ -23,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Используем актуальную версию Node.js
+          node-version: '18'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -34,14 +33,10 @@ jobs:
       - name: Build project
         run: npm run build
         working-directory: ./frontend
-        env:
-          # Если у вас есть переменные окружения для сборки, укажите их здесь
-          # Пример:
-          # REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
-          
+        # Пустой блок env был удален отсюда, так как он вызывал ошибку
+        
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/build
-          # publish_branch: gh-pages # Эта ветка используется по умолчанию
