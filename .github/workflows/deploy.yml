@@ -11,7 +11,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
-    # Даем права на запись, чтобы экшен мог опубликовать сборку
     permissions:
       contents: write
 
@@ -31,9 +30,13 @@ jobs:
         working-directory: ./frontend
 
       - name: Build project
+        # Этот шаг собирает ваш сайт для публикации.
+        # Блок 'env' ниже - самый важный. Он передает "секретный" URL
+        # вашего бэкенда в процесс сборки, чтобы фронтенд знал, куда подключаться.
         run: npm run build
         working-directory: ./frontend
-        # Пустой блок env был удален отсюда, так как он вызывал ошибку
+        env:
+          REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
         
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
